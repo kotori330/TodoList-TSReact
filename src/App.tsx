@@ -1,10 +1,7 @@
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TodoInput } from "./components/TodoInput";
-import { TodoList } from "./components/TodoList";
-import clsx from "clsx";
-
-export const cn = (...inputs: any[]) => clsx(...inputs);
+import { TodoItem } from "./components/TodoItem";
 
 export type TodoType = { id: string; name: string; isCompleted: boolean };
 
