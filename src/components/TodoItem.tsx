@@ -1,45 +1,41 @@
+import { useState } from "react";
 import { Button, TextField } from "@mui/material";
 import { cn } from "../utils/utils";
 import CompleteIcon from "./Button/CompleteButton";
 import DeleteIcon from "./Button/DeleteButton";
 import EditButton from "./Button/EditButton";
 import SaveButton from "./Button/SaveButton";
-import { cn } from "../App";
-import { ChangeEvent, useState, KeyboardEvent as ReactKeyboardEvent} from "react";
+
+import { TodoItemProps } from "../App";
 
 export const TodoItem = ({
   todoId,
   name,
   isCompleted,
-  updateIsCompleted,
-  handleEditToggle,
-  handleEnterDown,
+  updateTodo,
   deleteTodo,
-  handleSaveClick: handleSaveClickProp
+  toggleTodo,
 }: {
   todoId: string;
   name: string;
   isCompleted: boolean;
-  updateIsCompleted: (todoId: string) => void;
-  handleEditToggle: (todoId: string, newName: string) => void;
-  handleEnterDown: (e: ReactKeyboardEvent<HTMLInputElement>, todoId: string, editedName: string) => void;
-  deleteTodo: (todoId: string) => void;
-  handleSaveClick: (todoId: string, editedName: string) => void
-}) => {
+} & TodoItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
 
-  const handleEditClick = () => {
+  const openEditor = () => {
     setIsEditing(true);
   };
 
-  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
+  /* NOTE TO BRO: no need to specify event object as parameter */
+  const handleNameChange = (newName: string) => {
+    setEditedName(newName);
   };
 
-  const handleSaveClick = (todoId: string, editedName: string) => {
+  /*  NOTE TO BRO: "impure" function, no need to specify todoId and editedName as parameter */
+  const handleSave = () => {
     setIsEditing(false);
-    handleSaveClickProp(todoId, editedName);
+    updateTodo(todoId, editedName);
   };
 
   return (
@@ -52,7 +48,7 @@ export const TodoItem = ({
           wordBreak: "break-word",
           textAlign: "left",
         }}
-        onClick={() => updateIsCompleted(todoId)}
+        onClick={() => toggleTodo(todoId)}
         startIcon={
           <>
             <CompleteIcon isCompleted={isCompleted} />
@@ -61,9 +57,9 @@ export const TodoItem = ({
         endIcon={
           <>
             {isEditing ? (
-              <SaveButton todoId={todoId} handleSaveClick={handleSaveClick} />
+              <SaveButton handleSave={handleSave} />
             ) : (
-              <EditButton todoId={todoId} handleEditToggle={handleEditClick} />
+              <EditButton openEditor={openEditor} />
             )}
             <DeleteIcon todoId={todoId} deleteTodo={deleteTodo} />
           </>
@@ -74,9 +70,13 @@ export const TodoItem = ({
         {isEditing ? (
           <TextField
             value={editedName}
-            onChange={handleNameChange}
-            onKeyDown={(e) => handleEnterDown(e as ReactKeyboardEvent<HTMLInputElement>, todoId, editedName)}
-            onBlur={handleSaveClick}
+            onChange={(e) => handleNameChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSave();
+              }
+            }}
+            onBlur={() => handleSave()}
             autoFocus
             style={{ textAlign: "left" }}
           />

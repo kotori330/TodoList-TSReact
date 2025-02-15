@@ -1,14 +1,8 @@
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 
-const EditButton = ({
-  todoId,
-  handleEditToggle,
-}: {
-  todoId: string;
-  handleEditToggle: (todoId: string) => void;
-}) => {
+const EditButton = ({ openEditor }: { openEditor: () => void }) => {
   return (
-    <div onClick={() => handleEditToggle(todoId)}>
+    <div onClick={(e) => openEditor()}>
       <EditTwoToneIcon
         color="primary"
         sx={{

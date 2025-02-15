@@ -1,9 +1,15 @@
-import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TodoInput } from "./components/TodoInput";
 import { TodoItem } from "./components/TodoItem";
 
 export type TodoType = { id: string; name: string; isCompleted: boolean };
+
+export type TodoItemProps = {
+  updateTodo: (todoId: string, newName: string) => void;
+  deleteTodo: (todoId: string) => void;
+  toggleTodo: (todoId: string) => void;
+};
 
 export default function App() {
   // ------------These are states------------------
@@ -20,38 +26,19 @@ export default function App() {
     return [];
   });
 
-  // const [newTodoString, setNewTodoString] = useState(() => {return ''});
-  const [newTodoString, setNewTodoString] = useState("");
-
   // ----------These are event handlers--------------
-  const onNewTodoChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewTodoString(e.target.value);
-  };
 
-  const onAddBtnClick = () => {
-    const newTodoItem: TodoType = {
+  const addTodo = (name: string) => {
+    const todoItem: TodoType = {
       id: uuidv4(),
-      name: newTodoString,
+      name: name,
       isCompleted: false,
     };
 
-    //  Spread operator copy the existing data after adding newTodoItem to prevent data from being refresh (because useState's initial state is an empty array)
-    setTodoList([newTodoItem, ...todoList]);
-    setNewTodoString("");
+    setTodoList([todoItem, ...todoList]);
   };
 
-  const updateIsCompleted = (todoId: string) => {
-    setTodoList((prevState) => {
-      return prevState.map((todo) => {
-        if (todo.id === todoId) {
-          return { ...todo, isCompleted: !todo.isCompleted };
-        }
-        return todo;
-      });
-    });
-  };
-
-  const handleEditToggle = (todoId: string, newName: string) => {
+  const updateTodo = (todoId: string, newName: string) => {
     setTodoList((prevState) => {
       return prevState.map((todo) => {
         if (todo.id === todoId) {
@@ -62,19 +49,20 @@ export default function App() {
     });
   };
 
-  const handleEnterDown = (e: KeyboardEvent<HTMLInputElement>, todoId: string, editedName: string) => {
-    if (e.key === "Enter") {
-      handleEditToggle(todoId, editedName)
-    } 
-  }
-
-  const handleSaveClick = (todoId: string, editedName: string) => {
-    handleEditToggle(todoId, editedName)
-  }
-
   const deleteTodo = (todoId: string) => {
     setTodoList((prevState) => {
       return prevState.filter((todo) => todo.id !== todoId);
+    });
+  };
+
+  const toggleTodo = (todoId: string) => {
+    setTodoList((prevState) => {
+      return prevState.map((todo) => {
+        if (todo.id === todoId) {
+          return { ...todo, isCompleted: !todo.isCompleted };
+        }
+        return todo;
+      });
     });
   };
 
@@ -90,20 +78,24 @@ export default function App() {
     <div style={{ margin: "0 auto", maxWidth: "40rem" }}>
       <h1 style={{ textAlign: "center" }}>This is Todo App</h1>
 
-      <TodoInput
-        onNewTodoChange={onNewTodoChange}
-        newTodoString={newTodoString}
-        onAddBtnClick={onAddBtnClick}
-      />
-      <TodoList
-        todoList={todoList}
-        updateIsCompleted={updateIsCompleted}
-        handleEditToggle={handleEditToggle}
-        handleEnterDown={handleEnterDown}
-        deleteTodo={deleteTodo}
+      <TodoInput addTodo={addTodo} />
 
-        handleSaveClickProp={handleSaveClick}
-      />
+      {/* NOTE TO BRO: No need to create TodoList if it's just a list of TodoItem */}
+      {/* When using map method, "key" props is needed, its value must be unique */}
+      {/* Reason: React detect changes of components by their keys -> Essential to apply proper key for components  */}
+      {todoList.map((todo) => {
+        return (
+          <TodoItem
+            todoId={todo.id}
+            key={todo.id}
+            name={todo.name}
+            isCompleted={todo.isCompleted}
+            updateTodo={updateTodo}
+            deleteTodo={deleteTodo}
+            toggleTodo={toggleTodo}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -1,14 +1,8 @@
 import SaveAsTwoToneIcon from "@mui/icons-material/SaveAsTwoTone";
 
-const SaveButton = ({
-  todoId,
-  handleSaveClick,
-}: {
-  todoId: string;
-  handleSaveClick: () => void;
-}) => {
+const SaveButton = ({ handleSave }: { handleSave: () => void }) => {
   return (
-    <div onClick={handleSaveClick}>
+    <div onClick={() => handleSave()}>
       <SaveAsTwoToneIcon
         color="primary"
         sx={{
