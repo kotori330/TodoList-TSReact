@@ -3,68 +3,54 @@ import CompleteIcon from "./Button/CompleteButton";
 import DeleteIcon from "./Button/DeleteButton";
 import EditButton from "./Button/EditButton";
 import SaveButton from "./Button/SaveButton";
-import { cn } from "../App";
-import { ChangeEvent, useState, KeyboardEvent as ReactKeyboardEvent} from "react";
+import { cn } from "../utils/clsx";
+import { useState } from "react";
+import { TodoItemProps } from "../App";
 
 export const TodoItem = ({
   todoId,
   name,
   isCompleted,
-  updateIsCompleted,
-  handleEditToggle,
-  handleEnterDown,
+  updateTodo,
+  toggleTodo,
   deleteTodo,
-  handleSaveClick: handleSaveClickProp
-}: {
-  todoId: string;
-  name: string;
-  isCompleted: boolean;
-  updateIsCompleted: (todoId: string) => void;
-  handleEditToggle: (todoId: string, newName: string) => void;
-  handleEnterDown: (e: ReactKeyboardEvent<HTMLInputElement>, todoId: string, editedName: string) => void;
-  deleteTodo: (todoId: string) => void;
-  handleSaveClick: (todoId: string, editedName: string) => void
-}) => {
+}: { todoId: string; name: string; isCompleted: boolean } & TodoItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
 
-  const handleEditClick = () => {
-    setIsEditing(true);
+  const openEditor = () => {
+    setIsEditing(true); // flag
   };
 
-  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
+  // NOTE TO BRO: no need to specify event object as parameter in event handle
+  // Reason: Type of "e" obj is kinda long and unnecessary
+  // Solution: Use "e" obj directly in component (line 69-70)
+  const handleNameChange = (newName: string) => {
+    setEditedName(newName);
   };
 
-  const handleSaveClick = (todoId: string, editedName: string) => {
+  // NOTE TO BRO: This is an "impure" function.
+  // Reason: Call another function with out-of-scope parameter
+  // Usage: no need to specify todoId and editedName as parameter in handleSave
+  const handleSave = () => {
     setIsEditing(false);
-    handleSaveClickProp(todoId, editedName);
+    updateTodo(todoId, editedName);
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className="todo-item" style={{ display: "flex" }}>
       <Button
         fullWidth={true}
         style={{
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           flexGrow: 1,
           wordBreak: "break-word",
           textAlign: "left",
         }}
-        onClick={() => updateIsCompleted(todoId)}
+        onClick={() => toggleTodo(todoId)}
         startIcon={
           <>
             <CompleteIcon isCompleted={isCompleted} />
-          </>
-        }
-        endIcon={
-          <>
-            {isEditing ? (
-              <SaveButton todoId={todoId} handleSaveClick={handleSaveClick} />
-            ) : (
-              <EditButton todoId={todoId} handleEditToggle={handleEditClick} />
-            )}
-            <DeleteIcon todoId={todoId} deleteTodo={deleteTodo} />
           </>
         }
         // isCompleted ? 'strikethrough' : ''
@@ -72,17 +58,32 @@ export const TodoItem = ({
       >
         {isEditing ? (
           <TextField
+            size="small"
             value={editedName}
-            onChange={handleNameChange}
-            onKeyDown={(e) => handleEnterDown(e as ReactKeyboardEvent<HTMLInputElement>, todoId, editedName)}
-            onBlur={handleSaveClick}
+            onChange={(e) => {
+              handleNameChange(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSave();
+              }
+            }}
+            onBlur={handleSave}
             autoFocus
-            style={{ textAlign: "left" }}
+            sx={{ textAlign: "left" }}
           />
         ) : (
-          <span style={{ textAlign: "left" }}>{name}</span>
+          <span>{name}</span>
         )}
       </Button>
+      <>
+        {isEditing ? (
+          <SaveButton handleSave={handleSave} />
+        ) : (
+          <EditButton openEditor={openEditor} />
+        )}
+        <DeleteIcon todoId={todoId} deleteTodo={deleteTodo} />
+      </>
     </div>
   );
 };

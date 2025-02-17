@@ -1,22 +1,27 @@
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 
-const EditButton = ({
-  todoId,
-  handleEditToggle,
-}: {
-  todoId: string;
-  handleEditToggle: (todoId: string) => void;
-}) => {
+const EditButton = ({ openEditor }: { openEditor: () => void }) => {
   return (
-    <div onClick={() => handleEditToggle(todoId)}>
+    <div
+      onClick={openEditor}
+      style={{
+        padding: "0.5rem",
+        borderRadius: "4px",
+        cursor: "pointer",
+        transition: "0.3s",
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.backgroundColor = "#E5e5e5";
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+      }}
+    >
       <EditTwoToneIcon
         color="primary"
         sx={{
-          margin: "0.005rem 0.5rem",
-          "&:hover": {
-            backgroundColor: "#E5e5e5",
-            transition: "0.3s",
-          },
+          display: "flex",
+          alignItems: "center"
         }}
       />
     </div>

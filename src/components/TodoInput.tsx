@@ -1,17 +1,14 @@
 import { Button, TextField } from "@mui/material";
-import { ChangeEvent } from "react";
+import { useState } from "react";
 
-type Props = {
-  newTodoString: string;
-  onNewTodoChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onAddBtnClick: () => void;
-};
+export const TodoInput = ({ addTodo }: { addTodo: (name: string) => void }) => {
+  const [name, setName] = useState("");
 
-export const TodoInput = ({
-  newTodoString,
-  onNewTodoChange,
-  onAddBtnClick,
-}: Props) => {
+  // No need to specify e object
+  const handleNameChange = (name: string) => {
+    setName(name);
+  };
+
   return (
     <div
       style={{
@@ -22,13 +19,16 @@ export const TodoInput = ({
     >
       <TextField
         size="small"
-        value={newTodoString}
-        onChange={onNewTodoChange}
+        value={name}
+        onChange={(e) => handleNameChange(e.target.value)}
         style={{ margin: "1rem" }}
       />
       <Button
         variant="contained"
-        onClick={onAddBtnClick}
+        onClick={() => {
+          addTodo(name);
+          setName("");
+        }}
         style={{ margin: "1rem" }}
       >
         Add
